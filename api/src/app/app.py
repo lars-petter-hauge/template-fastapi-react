@@ -69,6 +69,17 @@ def create_app() -> FastAPI:
             )
         configure_azure_monitor(**kwargs)
         FastAPIInstrumentor.instrument_app(app, excluded_urls="healthcheck")
+    elif config.OTEL_EXPORTER_OTLP_ENDPOINT:
+        from opentelemetry import trace
+        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+        from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+        provider = TracerProvider()
+        provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(endpoint=config.OTEL_EXPORTER_OTLP_ENDPOINT)))
+        trace.set_tracer_provider(provider)
+        FastAPIInstrumentor.instrument_app(app, excluded_urls="healthcheck")
 
     app.include_router(authenticated_routes, dependencies=[Security(auth_with_jwt)])
     app.include_router(public_routes)

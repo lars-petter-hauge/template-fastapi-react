@@ -27,6 +27,7 @@ services:
         condition: service_healthy
     environment:
       OTEL_SERVICE_NAME: template-fastapi-react-api
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       MONGODB_HOSTNAME: db
       MONGODB_PORT: "27017"
       MONGODB_DATABASE: ${MONGODB_DATABASE:-test}
@@ -83,6 +84,24 @@ services:
       - cookie-cache-password
     environment:
       REDIS_PASSWORD_FILE: /run/secrets/cookie-cache-password
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.138.0
+    restart: unless-stopped
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    depends_on:
+      - jaeger
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.65.0
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      # Jaeger UI — open http://localhost:16686 to view traces.
+      - "16686:16686"
 
 volumes:
   cookie_cache_data:

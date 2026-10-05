@@ -4,8 +4,11 @@ import { AuthProvider } from 'react-oauth2-code-pkce'
 import App from './App'
 import { client } from './api/generated/client.gen'
 import { authConfig } from './auth'
+import { initTelemetry } from './common/telemetry'
 
 const hasAuthConfig = import.meta.env.VITE_AUTH === '1'
+
+initTelemetry()
 
 client.setConfig({
   baseUrl: `${window.location.origin}/api`,

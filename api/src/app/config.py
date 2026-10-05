@@ -12,6 +12,9 @@ class Config(BaseSettings):
     # Logging
     LOGGER_LEVEL: LoggerLevel = Field(default=LoggerLevel.INFO)
     APPINSIGHTS_CONSTRING: str | None = None
+    # Generic OpenTelemetry collector endpoint (e.g. for local Jaeger via docker-compose).
+    # Only used when APPINSIGHTS_CONSTRING is unset.
+    OTEL_EXPORTER_OTLP_ENDPOINT: str | None = None
 
     # Database
     MONGODB_USERNAME: str = "dummy"
